@@ -121,12 +121,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "02_Bot/API - snapshots.md",
+                "file": "02_Bot/DB - blogdb schema.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "API - snapshots"
+              "title": "DB - blogdb schema"
             }
           }
         ],
@@ -293,10 +293,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "ef0f65bca2cea7b0",
+  "active": "8cfb62e5852c8ee2",
   "lastOpenFiles": [
-    "02_Bot/DB - blogdb schema.md",
     "02_Bot/API - snapshots.md",
+    "02_Bot/DB - blogdb schema.md",
     "02_Bot/Bot - project overview (2026-03-08).md",
     "02_Bot/Bot - overview.md",
     "90_Journal/2026-03-08.md",
