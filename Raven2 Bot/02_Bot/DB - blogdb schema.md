@@ -120,3 +120,42 @@ json
 - `quantity` — количество в лоте.
     
 - `direction` — `"buy"` или `"sell"`.
+
+**Интерпретация `days` в `/stats/terramond/{code}/basic` как «recent»**
+
+Эндпоинт:
+
+- `GET /stats/terramond/{code}/basic`
+    
+
+Параметры:
+
+- `direction_filter`: `"buy" | "sell" | "both"` (по умолчанию `"both"`).
+    
+- `days`: `int | None`.
+    
+
+Семантика `days`:
+
+- Если `days` не задан → считаем по **всей истории**.
+    
+- Если `days > 0` → считаем статистику только по лотам из снимков, у которых `taken_at >= (datetime.utcnow() - days)`.
+    
+- Таким образом, «recent N days» реализуется через `?days=N`:
+    
+
+Примеры:
+
+- **Последние 30 дней, только sell**:
+    
+
+text
+
+`/stats/terramond/wood_basic/basic?direction_filter=sell&days=30`
+
+- **Последние 7 дней, buy+sell**:
+    
+
+text
+
+`/stats/terramond/wood_basic/basic?direction_filter=both&days=7`
