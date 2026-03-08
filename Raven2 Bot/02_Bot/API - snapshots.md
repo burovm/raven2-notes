@@ -1,0 +1,1 @@
+API: POST /snapshots — контракт JSON (Linux backend raven2-bot).
