@@ -78,3 +78,45 @@ json
     - иначе → `action = "hold"`.
         
 - Если по заданным фильтрам нет данных → `action = "hold"`, `avg_price` и `deviation_percent` = `null`, reason: «Недостаточно исторических данных…».
+
+**Эндпоинт таймлайна цен (`GET /prices/terramond/{code}/timeline`)**
+
+Назначение:
+
+- Вернуть временной ряд цен по одному террамонду для анализа и построения графиков.
+    
+
+Параметры:
+
+- `code` — код террамонда (`terramond_code`, например `wood_basic`).
+    
+- `direction_filter` (query, опционально, по умолчанию `"both"`):
+    
+    - `"sell"` — только лоты с `direction="sell"`.
+        
+    - `"buy"` — только `direction="buy"`.
+        
+    - `"both"` — все лоты.
+        
+- `days` (query, опционально):
+    
+    - если `days > 0`, берутся только снимки за последние `N` дней от `datetime.utcnow()`.
+        
+    - если не задан, используется вся история.
+        
+
+Схема ответа (`TerramondPriceTimeline`):
+
+json
+
+`{   "terramond_code": "wood_basic",  "terramond_name": "Basic Wood",  "points": [    {      "taken_at": "2026-03-08T10:00:00",      "unit_price": 123.45,      "quantity": 100,      "direction": "sell"    }  ] }`
+
+Где каждый `points[]` (`TerramondPricePoint`):
+
+- `taken_at` — время снимка аукциона (UTC, как в `snapshots.taken_at`).
+    
+- `unit_price` — цена за единицу.
+    
+- `quantity` — количество в лоте.
+    
+- `direction` — `"buy"` или `"sell"`.
