@@ -65,3 +65,50 @@ Raven2 Auction Bot — это инструмент для анализа и ав
 - Быстрый переключатель:
   - режим только-аналитика/ассистент;
   - режим с автоматическим исполнением сигналов.
+
+
+## Архитектура Raven 2 bot (2026-03-09)
+
+- Proxmox / rocketsrv
+  - Хост-гипервизор, на котором живут все VM проекта.
+  - Включен IOMMU, настроен GPU passthrough для одной RTX 4090 под Win11-VM.
+  - Основные VM:
+    - `bot-debian` – backend и аналитика.
+    - `win-raven2` – Windows 11 с Raven 2 + OCR-клиент (GPU passthrough 4090).
+
+- VM `bot-debian` (Linux backend)
+  - Репозиторий `raven2-bot` в `~/projects/raven2-bot`.
+  - Стек: Python + FastAPI + SQLAlchemy + SQLite.
+  - Модели БД:
+    - `terramonds` (id, code, name, ...),
+    - `snapshots` (id, taken_at, source, ...),
+    - `lots` (id, snapshot_id, terramond_id, unit_price, quantity, direction).
+  - API:
+    - `POST /snapshots` – принимает JSON с `taken_at`, `source`, `lots[]` (lot без `terramond_code`, только `terramond_name` и числа), автосоздаёт террамонды по имени.
+    - Набор эндпоинтов статистики и сигналов по отдельным террамондам.
+  - Запуск:
+    - Docker + docker-compose, контейнер `raven2-backend` на порту 8000.
+
+- VM `win-raven2` (Windows 11 + Raven 2)
+  - Windows 11 Pro/Enterprise (VM в Proxmox, q35 + OVMF + CPU host).
+  - GPU passthrough RTX 4090 (PCI 05:00.0/05:00.1), драйвер NVIDIA установлен.
+  - ПО:
+    - Python 3.14 + pip, директория `C:\raven2-bot`.
+    - Клиент `fake_client.py` – периодически шлёт тестовые снапшоты в backend `/snapshots`.
+    - Epic Games Launcher + клиент Raven 2; игра работает и при закрытом RDP.
+  - Будущая роль:
+    - Запуск клиента Raven 2.
+    - Снятие скринов экрана террамондов.
+    - OCR + парсинг в структуру `lots[]` и отправка в backend.
+
+- Общее взаимодействие
+  - Win11-VM → backend:
+    - HTTP `POST /snapshots` с JSON:
+      - `taken_at` (UTC),
+      - `source` (идентификатор клиента/VM),
+      - `screen_type` (например, `market_terramonds`),
+      - `lots[]` (имя террамонда, количество, цена за единицу, направление).
+  - Backend → SQLite:
+    - Сохраняет все снапшоты и лоты, строит агрегаты и сигналы.
+  - Obsidian:
+    - Vault `C2 Bot` описывает инфраструктуру (Proxmox, VM), backend (модели/эндпоинты), Windows-VM и OCR-пайплайн, плюс ежедневный журнал прогресса.
